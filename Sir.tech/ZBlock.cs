@@ -16,7 +16,7 @@ namespace Sir.tech
             new Position[] { new(0, 1), new(1, 0), new(1, 1), new(2, 0) }
         };
 
-        public override int Id => 1;  // must be public
+        public override int Id => 7;  // must be public
         protected override Position StartOffset => new Position(0, 3);
         protected override Position[][] Tiles => tiles;
     }
