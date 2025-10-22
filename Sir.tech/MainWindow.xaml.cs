@@ -107,6 +107,8 @@ namespace Sir.tech
                 gamestate.MoveBlockDown();
                 Draw(gamestate);
             }
+
+            GameOverMenu.Visibility = Visibility.Visible;
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
@@ -145,10 +147,11 @@ namespace Sir.tech
         }
 
 
-        private void PlayAgain_Click(object sender, RoutedEventArgs e)
+        private async void PlayAgain_Click(object sender, RoutedEventArgs e)
         {
+            gamestate = new GameState();
             GameOverMenu.Visibility = Visibility.Hidden;
-
+            await GameLoop();
             ScoreText.Text = "Score: 0";
         }
 
