@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -11,9 +11,6 @@ using System.Windows.Shapes;
 
 namespace Sir.tech
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
 
@@ -103,22 +100,32 @@ namespace Sir.tech
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            // Example input handling
+            if (gamestate.GameOver)
+            {
+                return;
+            }
+                    //Inputs
             switch (e.Key)
             {
                 case Key.Left:
-                    // Move piece left
+                    gamestate.MoveBlockLeft();
                     break;
                 case Key.Right:
-                    // Move piece right
+                    gamestate.MoveBlockRight();
                     break;
                 case Key.Down:
-                    // Move piece down faster
+                    gamestate.MoveBlockDown();
                     break;
                 case Key.Up:
-                    // Rotate piece
+                    gamestate.RotateBlockCW();
                     break;
+                case Key.Z:
+                    gamestate.RotateBlockCCW();
+                    break;
+                default:
+                    return;
             }
+            Draw(gamestate);
         }
 
         private void GameCanvas_Loaded(object sender, RoutedEventArgs e)
@@ -129,13 +136,7 @@ namespace Sir.tech
 
         private void PlayAgain_Click(object sender, RoutedEventArgs e)
         {
-            // Example: hide the GameOver menu and reset your game
             GameOverMenu.Visibility = Visibility.Hidden;
-
-            // Call your game restart logic here
-            // For example, if you have a GameState object that manages everything:
-            // gameState.Reset();
-            // Or recreate the current block, clear lines, etc.
 
             ScoreText.Text = "Score: 0";
         }
