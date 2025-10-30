@@ -1,30 +1,27 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sir.tech
 {
     internal class GameState
     {
         private Block currentBlock;
+        public event Action<Block, List<Position>> OnBlockPlaced;
+
         public Block CurrentBlock
-        { 
-        get => currentBlock;
+        {
+            get => currentBlock;
             private set
             {
                 currentBlock = value;
                 currentBlock.Reset();
 
-                for (int i = 0; i <2; i++)
+                for (int i = 0; i < 2; i++)
                 {
                     currentBlock.Move(1, 0);
-
                     if (!BlockFits())
-                    {
                         currentBlock.Move(-1, 0);
-                    }
                 }
             }
         }
@@ -49,20 +46,15 @@ namespace Sir.tech
             foreach (Position p in CurrentBlock.TilePositions())
             {
                 if (!GameGrid.IsEmpty(p.Row, p.Column))
-                {
                     return false;
-                }
             }
             return true;
         }
 
-
         public void HoldBlock()
         {
             if (!CanHold)
-            {
                 return;
-            }
 
             if (HeldBlock == null)
             {
@@ -77,42 +69,34 @@ namespace Sir.tech
             }
 
             CanHold = false;
-
         }
 
         public void RotateBlockCW()
         {
             CurrentBlock.RotateCW();
             if (!BlockFits())
-            {
                 CurrentBlock.RotateCCW();
-            }
         }
 
         public void RotateBlockCCW()
         {
             CurrentBlock.RotateCCW();
             if (!BlockFits())
-            {
                 CurrentBlock.RotateCW();
-            }
         }
+
         public void MoveBlockLeft()
         {
-                       CurrentBlock.Move(0, -1);
+            CurrentBlock.Move(0, -1);
             if (!BlockFits())
-            {
                 CurrentBlock.Move(0, 1);
-            }
         }
 
         public void MoveBlockRight()
         {
             CurrentBlock.Move(0, 1);
             if (!BlockFits())
-            {
                 CurrentBlock.Move(0, -1);
-            }
         }
 
         public bool IsGameOver()
@@ -120,11 +104,13 @@ namespace Sir.tech
             return !(GameGrid.IsRowEmpty(0) && GameGrid.IsRowEmpty(1));
         }
 
-        private void PlaceBlock()
+        public List<Position> PlaceBlock()
         {
+            List<Position> placed = new List<Position>();
             foreach (Position p in CurrentBlock.TilePositions())
             {
                 GameGrid[p.Row, p.Column] = CurrentBlock.Id;
+                placed.Add(p);
             }
 
             Score += GameGrid.ClearFullRows();
@@ -138,6 +124,8 @@ namespace Sir.tech
                 CurrentBlock = BlockQueue.GetAndUpdate();
                 CanHold = true;
             }
+
+            return placed;
         }
 
         public void MoveBlockDown()
@@ -146,14 +134,15 @@ namespace Sir.tech
             if (!BlockFits())
             {
                 CurrentBlock.Move(-1, 0);
-                PlaceBlock();
+                var blockJustPlaced = CurrentBlock;
+                var placed = PlaceBlock();
+                OnBlockPlaced?.Invoke(blockJustPlaced, placed);
             }
         }
 
         private int TileDropDistance(Position p)
         {
             int drop = 0;
-
             while (GameGrid.IsEmpty(p.Row + drop + 1, p.Column))
             {
                 drop++;
@@ -166,16 +155,17 @@ namespace Sir.tech
             int drop = GameGrid.Rows;
             foreach (Position p in CurrentBlock.TilePositions())
             {
-                drop = System.Math.Min(drop, TileDropDistance(p));
+                drop = Math.Min(drop, TileDropDistance(p));
             }
             return drop;
         }
 
         public void DropBlock()
         {
+            var blockJustPlaced = CurrentBlock;
             CurrentBlock.Move(BlockDropDistance(), 0);
-            PlaceBlock();
+            var placed = PlaceBlock();
+            OnBlockPlaced?.Invoke(blockJustPlaced, placed);
         }
-
     }
 }
